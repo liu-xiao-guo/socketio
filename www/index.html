@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>SocketIo demo</title>
+    <script src="/jquery-3.1.1.min.js"></script>
+    <script src="/jquery.jqplot.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="/jquery.jqplot.min.css" />
+
+    <script src="raphael-2.1.4.min.js"></script>
+    <script src="justgage.js"></script>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const chartMaxDots = 10;
+      var chart, gage;
+      var values = [];
+      var socket = io.connect('http://localhost:4000');
+
+      socket.on('light-sensor-value', function (data) {
+        $('#light-sensor-value').text(data);
+        var value = parseInt(data);
+        updateChart(value);
+        gage.refresh(value);
+      });
+
+      socket.on('message', function (data) {
+        console.log(data);
+      });
+
+      $(document).ready(function() {
+         $('#light-sensor-value').text('Waiting...');
+         chart = $.jqplot ('light-sensor-chart', [[0]]);
+         gage = new JustGage({
+            id: "light-sensor-gage",
+            value : 0,
+            min: 0,
+            max: 1000,
+            gaugeWidthScale: 0.6,
+            customSectors: {
+              percents: true,
+              ranges: [{
+                color : "#43bf58",
+                lo : 0,
+                hi : 500
+              },{
+                color : "#ff3b30",
+                lo : 501,
+                hi : 1000
+              }]
+            },
+            counter: false
+          });
+      });
+      function updateChart(value) {
+        chart.destroy();
+        if(values.length >= chartMaxDots)
+          values.shift();
+        values.push(value);
+        chart = $.jqplot ('light-sensor-chart', [values]);
+      }
+    </script>
+
+    <style>
+      .gauge {
+        width: 100%;
+        height: 200px;
+        border: 1px solid #ddd;
+        box-sizing: border-box;
+        margin: 30px 0 20px 0;
+      }
+      .chart {
+        width: 100%;
+        height: 300px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h3>Light Sensor</h3>
+    <p id="light-sensor-value"></p>
+    <div id="light-sensor-gage" class="gauge"></div>
+    <div id="light-sensor-chart" class="chart"></div>
+  </body>
+</html>

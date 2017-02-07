@@ -1,0 +1,19 @@
+name: socketio
+version: "0.1"
+summary: A simple shows how to make use of socket io
+description: socket.io snap example
+
+grade: stable
+confinement: strict
+
+apps:
+  socket:
+    command: bin/socketio
+    daemon: simple
+    plugs: [network-bind]
+
+parts:
+  nod:
+    plugin: nodejs
+    source: .
+    
